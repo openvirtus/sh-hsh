@@ -1,0 +1,105 @@
+#!/bin/sh -e
+#L:
+#l:  Copyright (c) 2018 Openvirtus.com, http://openvirtus.com
+#L:
+#L:  Permission is hereby granted, free of charge, to any person obtaining
+#L:  a copy of this software and associated documentation files (the
+#L:  "Software"), to deal in the Software without restriction, including
+#L:  without limitation the rights to use, copy, modify, merge, publish,
+#L:  distribute, sublicense, and/or sell copies of the Software, and to
+#L:  permit persons to whom the Software is furnished to do so, subject to
+#L:  the following conditions:
+#L:
+#L:  The above copyright notice and this permission notice shall be
+#L:  included in all copies or substantial portions of the Software.
+#L:
+#L:  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+#L:  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+#L:  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+#L:  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+#L:  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+#L:  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+#L:  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#L:
+#h: Usage: $0 ...
+#h:
+#h: This script helps keeping a little summary of your scripts.
+#h:                                           ______________________________
+#h: -v : Show honored environment variables. |#a: [CATEGORY] LITTLE SUMMARY |
+#h: -u : Update cache.                       |______________________________|
+#h: -l : List summary.
+#::
+#a: [ADMIN] Script search tool.
+hhelp() {
+    ## Parse command line arguments.
+    case "${1}" in -*v*) hhelp_show_variables ;; esac
+    case "${1}" in -*u*) hhelp_update_cache   ;; esac
+    case "${1}" in -*l*) hhelp_list_summary   ;; esac
+    case "${1}" in -*)   shift                ;; esac
+}
+hhelp_show_variables() {
+    printf '%-20s: %s\n' HHELP_CACHE_FILE "${HHELP_CACHE_FILE}"
+}
+hhelp_calc_variables() {
+    HHELP_CACHE_FILE="${HOME}/.hhelp"
+}
+## -------------------------------------------------------------------------------------
+hhelp_update_cache() {
+    echo "Updating ${HHELP_CACHE_FILE} ..." >&2
+    hhelp_list_documented > "${HHELP_CACHE_FILE}"
+}
+hhelp_list_summary() {
+    if test -f "${HHELP_CACHE_FILE}";then
+        sed '
+        s|^\([^:]*\): |\1· |g
+        s|^\([^:]*\)· *\[\([^ ]*\)\] *\(.*\)$|\2/\1· \3|g
+        ' "${HHELP_CACHE_FILE}" | sort | awk -F "·" '{printf "%-20s : %s\n",$1,$2}'
+    fi
+}
+## -------------------------------------------------------------------------------------
+hhelp_list_path() {
+    local directory=
+    echo "${PATH}" | tr ':' '\n' | while read directory;do
+        if test -d "${directory}";then
+            echo "${directory}"
+        fi
+    done
+}
+hhelp_list_scripts() {
+    local directory= filename= bb= basename=
+    hhelp_list_path | while read directory;do
+        find "${directory}" -maxdepth 1 -type f -executable | while read filename;do
+            local bb="`head -c 2 < "${filename}"`"
+            if test @"#!" = @"${bb}";then
+                echo "${filename}"
+            fi
+        done
+    done
+}
+hhelp_list_documented() {
+    local filename=
+    hhelp_list_scripts | while read filename;do
+        local basename="`basename "${filename}"`"
+        sed -n 's|^\#a:|'"${basename}"':|p;/^\#/!q' "${filename}"
+        # After transform, quits, only reading one.
+    done
+}
+
+
+
+
+
+
+## ------------------------------------------------------------------------------------
+hhelp_calc_variables
+if test @"`basename "$0"`" = @"hhelp";then
+    if test ! -n "${1}";then
+        hhelp -l
+    elif test @"-h" = @"${1}" || test @"--help" = @"${1}";then
+        sed -n 's/^ *#h: \{0,1\}//p' "$0" | sed "s|\\\$0|`basename $0`|g"
+        echo ""
+        sed -n 's/^ *#l: \{0,1\}//p' "$0"
+    else
+        hhelp "$@"
+    fi
+fi

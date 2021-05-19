@@ -88,7 +88,7 @@ hsh() {
 
     
     ## Calculate dependencies and solve full path.
-    local dependencies="`hsh_deps "$cmd" | uniq`"
+    local dependencies="`hsh_deps "$cmd" | awk '!seen[$0]++'`"
     local launcher="`echo "$dependencies" | tail -n 1`"
 
     
