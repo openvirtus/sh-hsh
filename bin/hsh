@@ -1,5 +1,8 @@
 #!/bin/sh -e
 #L:
+#L:  This software is free to use and modify, but not free to maintain.
+#L:
+#l:  Donate bitcoin: 1C1ZzDje7vHhF23mxqfcACE8QD4nqxywiV
 #l:  Copyright (c) 2018 Openvirtus.com, http://openvirtus.com
 #L:
 #L:  Permission is hereby granted, free of charge, to any person obtaining
@@ -21,6 +24,11 @@
 #L:  OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 #L:  WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #L:
+#R: ## HSH
+#R:
+#R: This script helps you create standalone bundles and executing local
+#R: scripts in remote machines.
+#R:
 #h: Usage: hsh [FLAGS...] SCRIPT [ARGS...]
 #h:
 #h: Shell script wrapper and remote execution tool.
@@ -43,8 +51,7 @@
 #h: -w SH.EXE      : Run using wine.
 #h: -a             : Use `adb` on android.
 #h: -c CONTAINER|- : Run in container.
-#::
-#a: [ADMIN] Shell script standalone bundle generator.
+#r:
 set -e
 hsh() {
 
