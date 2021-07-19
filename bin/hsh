@@ -170,6 +170,7 @@ hsh_compile() {
     if test @"$o" = @"-";then local o=/dev/stdout;fi
     echo "#!/bin/sh"                    > "$o"
     echo "# BUNDLE FILE, DO NOT EDIT." >> "$o"
+    echo "export HSH_BOOTSTRAP=y"      >> "$o"
     while test -n "$1";do
         if test -n "$2";then
             sed '/^\. \(.*\)/d;''/^ *#[hlL]:/d' "$1"  >> "$o"
